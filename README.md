@@ -6,6 +6,8 @@ A digital game based on Google Chrome TRex with personal game music on tecnobreg
 - [x] pip install pygame
 - [x] pip install colorama
 
+![](https://github.com/claudiorogerio/Chrome_TecnoRex/blob/main/img/1/chrome.gif)
+
 ### > Execute
 ```shell
 python3 main.py
