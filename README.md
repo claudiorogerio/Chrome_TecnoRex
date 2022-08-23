@@ -1,5 +1,5 @@
 # Chrome_TecnoRex
-A digital game based on Google Chrome TRex with personal game music on tecnobrega rhythm 
+A digital game based on Google Chrome TRex with personal game music on tecnobrega rhythm. 
 The functionality of record audio is disponible just on SO Linux.
 
 ###  *Dependencies:*
