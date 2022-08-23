@@ -16,6 +16,8 @@
 # @subsection TODO
 #   - Ações com joystck
 #   - Audio sincronizado com acoes durante o jogo
+#   - Quando perde, o audio do cenario nao retorna
+#   - Add audio para cada personagem e acao
 #
 # @subsection MAKED
 #   - Totais de arvores
@@ -29,6 +31,7 @@
 #   - Tela inicial botao 'play'
 #   - Animacao inicial
 #   - Funcao de atualizacao de posicao de personagens
+#   - Taxa de amostragem do audio ok
 
 
 ## biblioteca responsavel por renderizar o jogo
@@ -67,6 +70,8 @@ from initial import *
 from sensor import *
 ## musicas para cada personagem
 #from audio import *
+
+from record_audio import *
 
 DEBUG = 0
 
@@ -149,6 +154,11 @@ f.close()
 ## pontos adquiridos durante o jogo
 pontos = 0
 
+# gravacao do audio do jogo
+partidas = 0
+file_audio = 'chrome_trex_audio'
+recording = False
+
 # tela inicial
 play_game = False
 pos_bt_play = get_pos_play( display )
@@ -187,7 +197,14 @@ while( True ):
                 if andar and not abaixar:
                     pular = ~pular
                     print( 'Pula sensor' )
+
+        if not recording:
+            if DEBUG: print( 'Iniciando gravacao...' )
+            proc = record_audio( file_audio + str(partidas) + '.mp3' )
+            recording = True
+
         if perdeu:
+            partidas += 1
             act_pipr = False
             act_visa = False
             act_arv = False
@@ -201,6 +218,9 @@ while( True ):
             t_rex = [ t_rex_0, t_rex_1, t_rex_0, t_rex_2, t_rex_3 ]
 #        if perdeu:
             print( 'Perdeu!!!')
+            #kill_proc_audio()
+            time.sleep(1)
+            kill_ffmpeg()
             mus_perdeu = pygame.mixer.Sound( './audio/lose.wav' )
             pygame.mixer.Channel(0).play( mus_perdeu )
 
