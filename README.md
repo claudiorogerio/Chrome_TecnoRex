@@ -8,7 +8,7 @@ The functionality of record audio is disponible just on SO Linux.
 - [x] pip install pygame
 - [x] pip install colorama
 
-[![Watch the video](https://github.com/claudiorogerio/Chrome_TecnoRex/blob/main/img/1/chrome_03.png)](https://github.com/claudiorogerio/Chrome_TecnoRex/blob/main/img/1/chrome_video.mp4)
+![](https://github.com/claudiorogerio/Chrome_TecnoRex/blob/main/img/1/chrome_video.gif)
 
 ### > Execute
 ```shell
