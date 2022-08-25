@@ -45,7 +45,7 @@ import operator
 ## Inicializacao do jogo
 pygame.init()
 ## titulo da janela
-pygame.display.set_caption( 'T_Rex' )
+pygame.display.set_caption( 'Tecno_Rex' )
 ## criacao do cenario
 display = ( 800, 400 )
 cenario = pygame.display.set_mode( display )
@@ -69,7 +69,7 @@ from particulas import *
 from initial import *
 from sensor import *
 ## musicas para cada personagem
-#from audio import *
+from audio import *
 
 from record_audio import *
 
@@ -134,10 +134,8 @@ pos_disp = ( 1, 1 )
 
 ## inicalizacao do mixer sonoro
 pygame.mixer.init( 44100, -16, 4, 1024*4 )
-musica_fundo = pygame.mixer.Sound( './audio/086_loose-playa-groove.wav' )
-pygame.mixer.Channel(0).play( musica_fundo, loops = -1 )
+
 ## musica do cenario
-#pygame.mixer.music.play( )
 act_music = False
 
 ## controle do pulo do personagem
@@ -158,6 +156,10 @@ pontos = 0
 partidas = 0
 file_audio = 'chrome_trex_audio'
 recording = False
+mus_base = False
+#mus_stop = False
+RECORD = True      # ativa a gravacao
+play_music_intro = True
 
 # tela inicial
 play_game = False
@@ -183,10 +185,29 @@ def load_ini():
     n_nuvens = iniciar_nuvens( display )
     t_rex = [ t_rex_0, t_rex_1, t_rex_0, t_rex_2, t_rex_3 ]
 
+mus_pipr = False
+mus_visa = False
+mus_arv  = False
+mus_helc = False
+mus_helc_disp = False
+mus_trex_disp = False
+
+
 ## inicio do jogo
 while( True ):
 
     if play_game:
+        # acoes de audio
+        # musica base do jogo
+        mus_base = mix_music( mus_base, perdeu, version=1 )
+
+        # musica para os personagens
+        mus_pipr, mus_visa, mus_arv, mus_helc, mus_helc_disp, mus_trex_disp = mix_persona( act_pipr, mus_pipr,
+        act_visa, mus_visa,
+        act_arv, mus_arv,
+        act_helc, mus_helc,
+        act_helc_disp, mus_helc_disp,
+        disparo, mus_trex_disp )
         ## eventos externos
         ## eventos de sensores
         if sensor_1 == True:
@@ -198,7 +219,7 @@ while( True ):
                     pular = ~pular
                     print( 'Pula sensor' )
 
-        if not recording:
+        if not recording and RECORD:
             if DEBUG: print( 'Iniciando gravacao...' )
             proc = record_audio( file_audio + str(partidas) + '.mp3' )
             recording = True
@@ -217,17 +238,21 @@ while( True ):
             n_nuvens = iniciar_nuvens( display )
             t_rex = [ t_rex_0, t_rex_1, t_rex_0, t_rex_2, t_rex_3 ]
 #        if perdeu:
-            print( 'Perdeu!!!')
             #kill_proc_audio()
             time.sleep(1)
             kill_ffmpeg()
-            mus_perdeu = pygame.mixer.Sound( './audio/lose.wav' )
-            pygame.mixer.Channel(0).play( mus_perdeu )
+            time.sleep(1)
+            mus_stop = True
+            print( 'Perdeu!!!', mus_stop )
+
 
 
         ## eventos do teclado
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                time.sleep(1)
+                kill_ffmpeg()
+                time.sleep(1)
                 pygame.quit(); sys.exit();
 
             ## JoyStick acionado por botões
@@ -313,11 +338,14 @@ while( True ):
                     f = open( 'points_max.txt', 'w' )
                     f.write(str(pontos_max))
                     f.close()
+                    time.sleep(1)
+                    kill_ffmpeg()
+                    time.sleep(1)
                     pygame.quit(); sys.exit();
 
                 ## atirar a arma
                 if event.key == pygame.K_a:
-                    print('Fogo')
+                    print('Bola de fogo disparar!')
                     if not disparo and balas >= 1 : # evitar duplo balas
                         disparo = True
                         balas -=1 # contagem de balas utilizados
@@ -328,6 +356,8 @@ while( True ):
                     if not andar:
                         andar = True
                         act_terr = True
+                        mus_stop = False
+                        mus_base = False
 
                     if andar and not abaixar:
                         pular = ~pular
@@ -370,6 +400,10 @@ while( True ):
 
         # cor de fundo
         cenario.fill( (255,255,255) )
+
+ #       if andar: # music
+            #mus_base = mix_music( mus_base, mus_stop, version=1 )
+#            print( 'adui', mus_stop )
 
 
         ## adicao de particulas
@@ -427,6 +461,7 @@ while( True ):
             if not act_pipr and andar and not act_visa:
                 act_pipr = ~act_pipr
                 if DEBUG: print( 'Voa pipira!' )
+
         if act_pipr:
             cenario.blit( pipira[idx_pip], ( (pos_pipira[0], pos_pipira[1]) ) )
             if not perdeu: # atualiza quando estiver ativo o jogo
@@ -435,9 +470,10 @@ while( True ):
                 else:
                     pos_pipira = ( int(pos_pipira[0])-vel_pip+6, pos_pipira[1] )
             # parar o act_pipr apos alguma posicao que tenha saido completamente do cenario
-            if pos_pipira[0] < -100.0 :
+            if pos_pipira[0] < -170.0 :
                 act_pipr = False
                 pos_pipira = get_pos_pipira( display )
+                mus_pipr = False
 
             idx_pip += 1
             if idx_pip > 4: idx_pip = 0
@@ -455,9 +491,10 @@ while( True ):
                 else:
                     pos_visa = ( int(pos_visa[0])-vel_visa+10, pos_visa[1]+np.random.randint(-1,2) )
             # parar o act_pipr apos alguma posicao que tenha saido completamente do cenario
-            if pos_visa[0] < -50.0 :
+            if pos_visa[0] < -150.0 :
                 act_visa = False
                 pos_visa = get_pos_visagem( display )
+                mus_visa = False
 
             idx_visa += 1
             if idx_visa > 3: idx_visa = 0
@@ -503,6 +540,7 @@ while( True ):
                         fogo_view = fogo[0]
                         pos_pipira = get_pos_pipira( display )
                         pos_fogo = get_pos_fogo( display )
+                        mus_pipr = False
 
                 if act_visa:
                     dst = np.sqrt( np.power( pos_fogo[1]- pos_visa[1], 2 )  + np.power( pos_fogo[0]-pos_visa[0], 2) ) + 0.01
@@ -516,16 +554,23 @@ while( True ):
                         pos_fogo = get_pos_fogo( display )
                         fogo_view = fogo[0]
                         cont_disparo = 0
+                        mus_visa = False
                         if DEBUG: print( 'fogo', pos_fogo, display[0] )
 
+
         pos_helc, act_helc, idx_helc, pos_disp, act_helc_disp, idx_disp = update_helic( cenario, display, act_helc, pos_helc, idx_helc, act_helc_disp, pos_disp, idx_disp )
+
+        if not act_arv: mus_arv = False
+        if not act_helc: mus_helc = False
+        if not act_helc_disp: mus_helc_disp = False
+        if not disparo: mus_trex_disp = False
 
         pygame.time.delay( 1000%vel_jogo )
 
         i += up_color
 
         ## colisoes com a pipira
-        dst = np.sqrt( np.power( pos_pipira[1]- pos_rex[1], 2 )  + np.power( pos_pipira[0]-pos_rex[0], 2) ) + 0.01
+        dst = np.sqrt( np.power( pos_pipira[1]- pos_rex[1], 2 ) + np.power( pos_pipira[0]-pos_rex[0], 2) ) + 0.01
         if DEBUG: print( pos_pipira[1], pos_rex[1], pos_pipira[0], pos_rex[0], dst )
 
         ## distancia de colisao
@@ -536,7 +581,7 @@ while( True ):
             perdeu = True
 
         ## colisoes com a act_visagem
-        dst = np.sqrt( np.power( pos_visa[1]- pos_rex[1], 2 )  + np.power( pos_visa[0]-pos_rex[0], 2) ) + 0.01
+        dst = np.sqrt( np.power( pos_visa[1] - pos_rex[1], 2 ) + np.power( pos_visa[0]-pos_rex[0], 2) ) + 0.01
 
         if DEBUG: print( pos_visa[1], pos_rex[1], pos_visa[0], pos_rex[0], dst )
 
@@ -607,14 +652,7 @@ while( True ):
         idx_ajuda += 1
         if idx_ajuda > 2 : idx_ajuda = 0
 
-        #pos_musica = float(pygame.mixer.music.get_pos())
-        #print( pos_musica, 'jjjjjjjj')
-        #act_music = mix_music( pos_musica, act_music, perdeu, andar, pular, disparo, act_helc, act_helc_disp, act_pipr, act_visa  )
-        #if pos_musica > 1280 or pos_musica == -1:
-        #    pygame.mixer.music.play( )
-        ## controle de audios
-        #if perdeu:
-        #    pygame.mixer.Channel(1).stop()
+
 
     #    pygame.display.flip()
 #        pygame.display.update()
@@ -623,6 +661,7 @@ while( True ):
             if DEBUG: print( vel_jogo )
 
 
+    ## tela inicial
     else:
         act_pipr = True
         act_visa = True
@@ -634,6 +673,10 @@ while( True ):
         pos_pipira, active, idx_pip = update_pipira( cenario, play_game, display, act_visa, pos_pipira, idx_pip, vel_pip )
         pos_visa, act_visa, idx_visa = update_visa( cenario, play_game, display, act_visa, pos_visa, idx_visa )
         pos_helc, act_helc, idx_helc, pos_disp, act_helc_disp, idx_disp = update_helic( cenario, display, act_helc, pos_helc, idx_helc, act_helc_disp, pos_disp, idx_disp )
+
+        if play_music_intro:
+            play_music_intro = False
+            pygame.mixer.Channel(0).play( mus_intro, loops = -1 )
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
