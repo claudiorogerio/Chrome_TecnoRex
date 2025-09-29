@@ -32,6 +32,7 @@ def get_data_arduino( sensor ):
     serial = serial.decode()
 
     if serial != '':
+        ## mudar aqui 
         return float( serial.split()[1] )
     else:
         return -1.0
