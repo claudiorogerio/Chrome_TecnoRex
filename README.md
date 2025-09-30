@@ -6,6 +6,7 @@ The record audio functionality is disponible just on SO Linux.
 - [x] sudo apt install ffmpeg
 - [x] sudo apt install python3
 - [x] pip install pygame
+- [x] pip install serial
 - [x] pip install colorama
 
 ![](https://github.com/claudiorogerio/Chrome_TecnoRex/blob/main/img/1/chrome_video.gif)
